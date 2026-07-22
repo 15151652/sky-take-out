@@ -10,6 +10,41 @@
         values
             (#{id}, #{categoryId}, #{name}, #{price}, #{image}, #{description}, #{createTime}, #{updateTime}, #{createUser}, #{status})
     </insert>
+    <!-- ... existing code ... -->
+    <update id="updateById">
+        update dish
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="image != null and image != ''">
+                image = #{image},
+            </if>
+            <if test="description != null and description != ''">
+                description = #{description},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="updateUser != null">
+                update_user = #{updateUser},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <!-- ... existing code ... -->
+
+    <delete id="deleteBatchIds">
+        delete from dish where id in <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                          #{id}
+        </foreach>
+    </delete>
 
 
     <select id="pageQuery" resultType="com.sky.vo.DishVO">

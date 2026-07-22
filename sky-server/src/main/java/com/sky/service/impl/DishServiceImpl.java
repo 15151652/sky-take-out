@@ -88,13 +88,60 @@ public class DishServiceImpl implements DishService {
         }
 
 //        //删除菜品数据
-        for (Long id : ids) {
-            dishMapper.deleteById(id);
-            dishFlavorMapper.deleteBatch(id);
-        }
+        dishMapper.deleteBatchIds(ids);
 
         //删除菜品口味数据
+        dishFlavorMapper.deleteBatchByDishIds(ids);
+    }
+
+    @Override
+    public DishVO getByIdWithFlavor(Long id) {
+        //根据菜品id查询菜品数据
+        Dish dish = dishMapper.getById(id);
+        //根据菜品id查询菜品口味数据
+        List<DishFlavor> flavors =  dishFlavorMapper.selectByDishId(id);
 
 
+ DishVO dishVO=new DishVO();
+        BeanUtils.copyProperties(dish, dishVO);
+        dishVO.setFlavors(flavors);
+
+        return dishVO;
+
+    }
+
+    @Override
+    @Transactional
+    public void updateWithFlavor(DishDTO dishDTO) {
+        //根据菜品id更新菜品数据
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO, dish);
+        dishMapper.updateById(dish);
+        dishFlavorMapper.deleteBatch(dishDTO.getId());
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        if (flavors != null && !flavors.isEmpty()) {
+            flavors.forEach(df -> df.setDishId(dishDTO.getId()));
+
+            dishFlavorMapper.insertBatch(flavors);
+        }
+
+    }
+    /**
+     * 根据分类id查询菜品信息
+     *
+     * @param categoryId
+     */
+
+    public List<Dish> getByCategoryID(Long categoryId) {
+        return dishMapper.getByCategoryID(categoryId);
+    }
+    //菜品停售/admin/dish/status/{status}
+    @Override
+    @Transactional
+    public void startOrStop(Integer status, Long id) {
+        Dish dish = new Dish();
+        dish.setStatus(status);
+        dish.setId(id);
+        dishMapper.updateById(dish);
     }
 }
